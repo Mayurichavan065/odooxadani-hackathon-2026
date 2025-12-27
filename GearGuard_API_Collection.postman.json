@@ -1,0 +1,320 @@
+{
+  "info": {
+    "name": "GearGuard API Collection",
+    "description": "Complete API collection for GearGuard Maintenance Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Equipment",
+      "item": [
+        {
+          "name": "List All Equipment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/equipment/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "equipment", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Equipment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Industrial Generator\",\n  \"serial_number\": \"GEN-2025-001\",\n  \"department_or_owner\": \"Facilities Department\",\n  \"location\": \"Building A - Basement\",\n  \"purchase_date\": \"2024-01-15\",\n  \"warranty_end\": \"2027-01-15\",\n  \"default_team\": 1,\n  \"is_usable\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/equipment/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "equipment", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Equipment Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/equipment/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "equipment", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Equipment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Industrial Generator (Updated)\",\n  \"serial_number\": \"GEN-2025-001\",\n  \"department_or_owner\": \"Facilities Department\",\n  \"location\": \"Building A - Basement\",\n  \"purchase_date\": \"2024-01-15\",\n  \"is_usable\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/equipment/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "equipment", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Equipment Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/equipment/1/requests/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "equipment", "1", "requests", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "List All Teams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/teams/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "teams", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Electrical Maintenance Team\",\n  \"member_ids\": [1]\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/teams/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "teams", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Maintenance Requests",
+      "item": [
+        {
+          "name": "List All Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/requests/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "requests", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Corrective Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Generator making unusual noise\",\n  \"equipment\": 1,\n  \"request_type\": \"CORRECTIVE\",\n  \"scheduled_date\": \"2025-12-30T09:00:00Z\",\n  \"duration\": \"03:00:00\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/requests/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "requests", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Preventive Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Quarterly preventive maintenance\",\n  \"equipment\": 1,\n  \"request_type\": \"PREVENTIVE\",\n  \"scheduled_date\": \"2026-01-15T10:00:00Z\",\n  \"duration\": \"02:00:00\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/requests/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "requests", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Status to IN_PROGRESS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/requests/1/status/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "requests", "1", "status", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Status to REPAIRED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REPAIRED\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/requests/1/status/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "requests", "1", "status", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Status to SCRAP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SCRAP\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/requests/1/status/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "requests", "1", "status", ""]
+            }
+          }
+        },
+        {
+          "name": "Assign Technician",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"technician\": 1\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/requests/1/assign/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "requests", "1", "assign", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "item": [
+        {
+          "name": "Get Preventive Maintenance Calendar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/calendar/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "calendar", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
