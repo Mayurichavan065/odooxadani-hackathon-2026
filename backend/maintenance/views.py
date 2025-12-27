@@ -74,7 +74,7 @@ class MaintenanceRequestViewSet(viewsets.ModelViewSet):
         else:
             serializer.save()
 
-    @action(detail=True, methods=['post'], url_path='status')
+    @action(detail=True, methods=['post', 'patch'], url_path='status')
     def update_status(self, request, pk=None):
         """
         Update maintenance request status.
