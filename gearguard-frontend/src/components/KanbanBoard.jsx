@@ -1,85 +1,78 @@
 import { useEffect, useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
-import { api } from "../api";
 import KanbanColumn from "./KanbanColumn";
+import CreateRequestModal from "./CreateRequestModal";
+import { mockRequests } from "../mockData";
+import { USE_MOCK_API } from "../config";
+import { api } from "../api";
 
 const STATUSES = ["NEW", "IN_PROGRESS", "REPAIRED", "SCRAP"];
 
 export default function KanbanBoard() {
   const [requests, setRequests] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    api.get("/requests/")
-      .then(res => {
-        if (Array.isArray(res.data)) {
-          setRequests(res.data);
-        } else {
-          setRequests([]);
-        }
-      })
-      .catch(() => {
-        // MOCK DATA (frontend-only mode)
-        setRequests([
-          {
-            id: 1,
-            subject: "Printer not working",
-            status: "NEW",
-            equipment_name: "Printer 01",
-            scheduled_date: "2024-01-01",
-            assigned_to: { name: "Alex" },
-          },
-          {
-            id: 2,
-            subject: "Oil leakage",
-            status: "IN_PROGRESS",
-            equipment_name: "CNC Machine",
-            scheduled_date: "2023-12-01",
-            assigned_to: { name: "Sam" },
-          },
-          {
-            id: 3,
-            subject: "Routine check",
-            status: "REPAIRED",
-            equipment_name: "Generator",
-            scheduled_date: "2023-11-20",
-            assigned_to: { name: "John" },
-          },
-        ]);
-      });
+    if (USE_MOCK_API) {
+      setRequests(mockRequests);
+    } else {
+      api.get("/requests/").then(res => setRequests(res.data));
+    }
   }, []);
 
   const onDragEnd = (result) => {
     if (!result.destination) return;
 
-    const requestId = result.draggableId;
-    const newStatus = result.destination.droppableId;
-
     setRequests(prev =>
       prev.map(r =>
-        String(r.id) === requestId ? { ...r, status: newStatus } : r
+        String(r.id) === result.draggableId
+          ? { ...r, status: result.destination.droppableId }
+          : r
       )
     );
   };
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Maintenance Kanban</h2>
+    <div className="p-6">
+      <div className="flex justify-between mb-4">
+        <h2 className="text-xl font-bold">Maintenance Kanban</h2>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-blue-600 text-white px-4 py-1 rounded"
+        >
+          + New Request
+        </button>
+      </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
-        <div style={{ display: "flex", gap: 16 }}>
+        <div className="flex gap-4">
           {STATUSES.map(status => (
             <KanbanColumn
               key={status}
               status={status}
-              requests={
-                Array.isArray(requests)
-                  ? requests.filter(r => r.status === status)
-                  : []
-              }
+              requests={requests.filter(r => r.status === status)}
             />
           ))}
         </div>
       </DragDropContext>
+
+      {showModal && (
+        <CreateRequestModal
+          onClose={() => setShowModal(false)}
+          onCreate={(data) => {
+            setRequests(prev => [
+              ...prev,
+              {
+                id: Date.now(),
+                subject: data.subject || "New Request",
+                status: "NEW",
+                equipment_name: "Unknown",
+              },
+            ]);
+            setShowModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }
