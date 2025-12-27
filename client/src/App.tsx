@@ -14,6 +14,7 @@ import TeamFormPage from "@/pages/teams/TeamFormPage";
 import RequestsListPage from "@/pages/requests/RequestsListPage";
 import RequestDetailPage from "@/pages/requests/RequestDetailPage";
 import RequestFormPage from "@/pages/requests/RequestFormPage";
+import KanbanBoard from "@/pages/requests/KanbanBoard";
 import CalendarPage from "@/pages/calendar/CalendarPage";
 import NotFound from "./pages/NotFound";
 
@@ -34,7 +35,10 @@ const App = () => (
       <BrowserRouter>
         <AppLayout>
           <Routes>
-            <Route path="/" element={<Navigate to="/equipment" replace />} />
+            <Route path="/" element={<Navigate to="/kanban" replace />} />
+            
+            {/* Kanban Board */}
+            <Route path="/kanban" element={<KanbanBoard />} />
             
             {/* Equipment */}
             <Route path="/equipment" element={<EquipmentListPage />} />

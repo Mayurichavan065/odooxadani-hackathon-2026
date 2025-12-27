@@ -7,12 +7,14 @@ import {
   Calendar, 
   Settings,
   ChevronLeft,
-  Menu
+  Menu,
+  LayoutDashboard
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 const navigation = [
+  { name: 'Kanban Board', href: '/kanban', icon: LayoutDashboard },
   { name: 'Equipment', href: '/equipment', icon: Wrench },
   { name: 'Teams', href: '/teams', icon: Users },
   { name: 'Requests', href: '/requests', icon: ClipboardList },
