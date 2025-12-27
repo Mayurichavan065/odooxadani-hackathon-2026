@@ -1,11 +1,7 @@
 import { Draggable } from "@hello-pangea/dnd";
-import { isBefore } from "date-fns";
 
 export default function RequestCard({ request, index }) {
-  const isOverdue =
-    request.scheduled_date &&
-    isBefore(new Date(request.scheduled_date), new Date()) &&
-    request.status !== "REPAIRED";
+  const isOverdue = request.scheduled_date && new Date(request.scheduled_date) < new Date();
 
   return (
     <Draggable draggableId={String(request.id)} index={index}>
@@ -14,18 +10,17 @@ export default function RequestCard({ request, index }) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          style={{
-            padding: 10,
-            marginBottom: 8,
-            background: "white",
-            borderLeft: isOverdue ? "5px solid red" : "5px solid green",
-            borderRadius: 4,
-            ...provided.draggableProps.style,
-          }}
+          className={`p-3 bg-white rounded shadow hover:shadow-lg transition cursor-pointer ${
+            isOverdue ? "border-l-4 border-red-500" : ""
+          }`}
         >
-          <strong>{request.subject}</strong>
-          <div>{request.equipment_name}</div>
-          <small>{request.assigned_to?.name || "Unassigned"}</small>
+          <div className="font-semibold text-gray-800">{request.subject}</div>
+          <div className="text-sm text-gray-500">
+            {request.equipment_name} • {request.assigned_to?.name || "Unassigned"}
+          </div>
+          {request.scheduled_date && (
+            <div className="text-xs text-gray-400 mt-1">Scheduled: {request.scheduled_date}</div>
+          )}
         </div>
       )}
     </Draggable>

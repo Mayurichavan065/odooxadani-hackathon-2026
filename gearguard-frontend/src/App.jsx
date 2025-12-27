@@ -1,25 +1,22 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
 import KanbanBoard from "./components/KanbanBoard";
-import CalendarView from "./components/CalendarView";
 import EquipmentList from "./components/EquipmentList";
 import EquipmentDetail from "./components/EquipmentDetail";
+import CalendarView from "./components/CalendarView";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <nav style={{ padding: 16 }}>
-        <Link to="/kanban">Kanban</Link>
-        <Link to="/calendar">Calendar</Link>
-        <Link to="/equipment">Equipment</Link>
-      </nav>
-
+    <Router>
+      <Navbar />
       <Routes>
-        <Route path="/" element={<KanbanBoard />} />
+        <Route path="/" element={<Home />} />
         <Route path="/kanban" element={<KanbanBoard />} />
-        <Route path="/calendar" element={<CalendarView />} />
         <Route path="/equipment" element={<EquipmentList />} />
         <Route path="/equipment/:id" element={<EquipmentDetail />} />
+        <Route path="/calendar" element={<CalendarView />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }

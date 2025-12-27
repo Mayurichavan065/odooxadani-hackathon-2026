@@ -1,0 +1,454 @@
+================================================================================
+  GEARGUARD - ONE-COMMAND SETUP FOR FRONTEND DEVELOPERS
+================================================================================
+
+This file contains everything you need to:
+1. Install all dependencies (Python + Django backend)
+2. Start the Django server automatically
+3. Connect your React frontend to the backend
+4. Test all API endpoints
+
+================================================================================
+  STEP 1: SETUP BACKEND (One-Time Setup)
+================================================================================
+
+WINDOWS USERS - Copy and paste this ENTIRE block into PowerShell:
+--------------------------------------------------------------------------------
+cd backend; python -m venv ../.venv; ../.venv/Scripts/Activate.ps1; pip install django djangorestframework django-cors-headers; python manage.py migrate; python manage.py createsuperuser --noinput --username admin --email admin@gearguard.com 2>$null; $env:DJANGO_SUPERUSER_PASSWORD="admin123"; python manage.py shell -c "from django.contrib.auth.models import User; User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@gearguard.com', 'admin123')"; python manage.py runserver 0.0.0.0:8000
+--------------------------------------------------------------------------------
+
+
+MAC/LINUX USERS - Copy and paste this ENTIRE block into Terminal:
+--------------------------------------------------------------------------------
+cd backend && python3 -m venv ../.venv && source ../.venv/bin/activate && pip install django djangorestframework django-cors-headers && python manage.py migrate && export DJANGO_SUPERUSER_PASSWORD=admin123 && python manage.py createsuperuser --noinput --username admin --email admin@gearguard.com 2>/dev/null || true && python manage.py runserver 0.0.0.0:8000
+--------------------------------------------------------------------------------
+
+
+WHAT THIS DOES:
+✓ Creates Python virtual environment
+✓ Installs Django, Django REST Framework, CORS headers
+✓ Creates database and applies migrations
+✓ Creates admin user (username: admin, password: admin123)
+✓ Starts server on http://localhost:8000
+
+AFTER RUNNING: Keep this terminal open! Server must run continuously.
+
+
+================================================================================
+  STEP 2: VERIFY BACKEND IS RUNNING
+================================================================================
+
+Open browser and visit: http://localhost:8000/api/
+
+You should see JSON with these endpoints:
+{
+  "equipment": "http://localhost:8000/api/equipment/",
+  "teams": "http://localhost:8000/api/teams/",
+  "requests": "http://localhost:8000/api/requests/",
+  "calendar": "http://localhost:8000/api/calendar/"
+}
+
+If you see this, backend is ready! ✓
+
+
+================================================================================
+  STEP 3: SETUP YOUR REACT FRONTEND
+================================================================================
+
+In a NEW terminal (keep backend running), navigate to your React project and run:
+
+npx create-react-app gearguard-frontend
+cd gearguard-frontend
+npm install axios
+
+
+================================================================================
+  STEP 4: CONNECT REACT TO DJANGO
+================================================================================
+
+Create this file in your React project:  src/api/config.js
+--------------------------------------------------------------------------------
+// API Configuration
+export const API_BASE_URL = 'http://localhost:8000/api';
+
+// Axios instance with default config
+import axios from 'axios';
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000,
+});
+
+export default apiClient;
+--------------------------------------------------------------------------------
+
+
+Create this file:  src/api/equipment.js
+--------------------------------------------------------------------------------
+import apiClient from './config';
+
+export const equipmentAPI = {
+  // Get all equipment
+  getAll: () => apiClient.get('/equipment/'),
+  
+  // Get single equipment
+  getById: (id) => apiClient.get(`/equipment/${id}/`),
+  
+  // Create new equipment
+  create: (data) => apiClient.post('/equipment/', data),
+  
+  // Update equipment
+  update: (id, data) => apiClient.put(`/equipment/${id}/`, data),
+  
+  // Delete equipment
+  delete: (id) => apiClient.delete(`/equipment/${id}/`),
+  
+  // Get equipment's maintenance requests
+  getRequests: (id) => apiClient.get(`/equipment/${id}/requests/`),
+};
+--------------------------------------------------------------------------------
+
+
+Create this file:  src/api/requests.js
+--------------------------------------------------------------------------------
+import apiClient from './config';
+
+export const requestsAPI = {
+  // Get all maintenance requests
+  getAll: () => apiClient.get('/requests/'),
+  
+  // Create new request
+  create: (data) => apiClient.post('/requests/', data),
+  
+  // Update request status
+  updateStatus: (id, status) => 
+    apiClient.post(`/requests/${id}/status/`, { status }),
+  
+  // Assign technician
+  assignTechnician: (id, technicianId) => 
+    apiClient.post(`/requests/${id}/assign/`, { technician: technicianId }),
+};
+--------------------------------------------------------------------------------
+
+
+Create this file:  src/api/teams.js
+--------------------------------------------------------------------------------
+import apiClient from './config';
+
+export const teamsAPI = {
+  // Get all teams
+  getAll: () => apiClient.get('/teams/'),
+  
+  // Create new team
+  create: (data) => apiClient.post('/teams/', data),
+};
+--------------------------------------------------------------------------------
+
+
+================================================================================
+  STEP 5: EXAMPLE REACT COMPONENT
+================================================================================
+
+Create this file:  src/components/EquipmentList.js
+--------------------------------------------------------------------------------
+import React, { useState, useEffect } from 'react';
+import { equipmentAPI } from '../api/equipment';
+
+function EquipmentList() {
+  const [equipment, setEquipment] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchEquipment();
+  }, []);
+
+  const fetchEquipment = async () => {
+    try {
+      setLoading(true);
+      const response = await equipmentAPI.getAll();
+      setEquipment(response.data.results || response.data);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load equipment: ' + err.message);
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateEquipment = async () => {
+    try {
+      const newEquipment = {
+        name: 'New Equipment',
+        serial_number: 'SN-' + Date.now(),
+        department_or_owner: 'IT Department',
+        location: 'Office',
+        purchase_date: '2025-12-27',
+        is_usable: true
+      };
+      
+      await equipmentAPI.create(newEquipment);
+      fetchEquipment(); // Refresh list
+      alert('Equipment created successfully!');
+    } catch (err) {
+      alert('Error creating equipment: ' + err.message);
+    }
+  };
+
+  if (loading) return <div>Loading equipment...</div>;
+  if (error) return <div style={{color: 'red'}}>{error}</div>;
+
+  return (
+    <div>
+      <h2>Equipment List</h2>
+      <button onClick={handleCreateEquipment}>Add New Equipment</button>
+      
+      <div style={{marginTop: '20px'}}>
+        {equipment.length === 0 ? (
+          <p>No equipment found. Click "Add New Equipment" to create one.</p>
+        ) : (
+          <table border="1" cellPadding="10" style={{width: '100%'}}>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Serial Number</th>
+                <th>Location</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {equipment.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.name}</td>
+                  <td>{item.serial_number}</td>
+                  <td>{item.location}</td>
+                  <td>{item.is_usable ? '✓ Usable' : '✗ Scrapped'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default EquipmentList;
+--------------------------------------------------------------------------------
+
+
+Update your  src/App.js:
+--------------------------------------------------------------------------------
+import React from 'react';
+import './App.css';
+import EquipmentList from './components/EquipmentList';
+
+function App() {
+  return (
+    <div className="App">
+      <header style={{padding: '20px', background: '#282c34', color: 'white'}}>
+        <h1>GearGuard - Maintenance Management System</h1>
+      </header>
+      <main style={{padding: '20px'}}>
+        <EquipmentList />
+      </main>
+    </div>
+  );
+}
+
+export default App;
+--------------------------------------------------------------------------------
+
+
+================================================================================
+  STEP 6: START YOUR REACT APP
+================================================================================
+
+In your React project directory, run:
+
+npm start
+
+Your React app will open at http://localhost:3000 and automatically connect to
+the Django backend at http://localhost:8000
+
+
+================================================================================
+  TROUBLESHOOTING
+================================================================================
+
+PROBLEM: "CORS error" or "Access-Control-Allow-Origin"
+SOLUTION: Backend already has CORS enabled. Make sure Django server is running.
+
+PROBLEM: "Network Error" or "Cannot connect"
+SOLUTION: Verify Django server is running at http://localhost:8000/api/
+
+PROBLEM: "Module not found" errors in React
+SOLUTION: Run:  npm install axios
+
+PROBLEM: Django server won't start
+SOLUTION: Make sure you're in the 'backend' folder and virtual environment is activated
+
+PROBLEM: Port 8000 already in use
+SOLUTION: Kill the process:
+  Windows: netstat -ano | findstr :8000  (then taskkill /PID <number> /F)
+  Mac/Linux: lsof -ti:8000 | xargs kill -9
+
+
+================================================================================
+  API ENDPOINTS REFERENCE
+================================================================================
+
+BASE URL: http://localhost:8000/api/
+
+EQUIPMENT:
+  GET    /equipment/              - List all equipment
+  POST   /equipment/              - Create equipment
+  GET    /equipment/{id}/         - Get equipment details
+  PUT    /equipment/{id}/         - Update equipment
+  DELETE /equipment/{id}/         - Delete equipment
+  GET    /equipment/{id}/requests/ - Get equipment's requests
+
+TEAMS:
+  GET    /teams/                  - List all teams
+  POST   /teams/                  - Create team
+
+MAINTENANCE REQUESTS:
+  GET    /requests/               - List all requests
+  POST   /requests/               - Create request
+  GET    /requests/{id}/          - Get request details
+  POST   /requests/{id}/status/   - Update status
+  POST   /requests/{id}/assign/   - Assign technician
+
+CALENDAR:
+  GET    /calendar/               - Get preventive maintenance calendar
+
+
+================================================================================
+  EXAMPLE API CALLS FROM REACT
+================================================================================
+
+// Create Equipment
+const newEquipment = {
+  name: "Server Rack",
+  serial_number: "SRV-2025-001",
+  department_or_owner: "IT Department",
+  location: "Data Center Room 3",
+  purchase_date: "2025-01-15",
+  warranty_end: "2028-01-15",
+  is_usable: true
+};
+const response = await equipmentAPI.create(newEquipment);
+
+
+// Create Maintenance Request
+const newRequest = {
+  subject: "Quarterly maintenance check",
+  equipment: 1,  // Equipment ID
+  request_type: "PREVENTIVE",
+  scheduled_date: "2026-01-15T10:00:00Z",
+  duration: "02:00:00"
+};
+const response = await requestsAPI.create(newRequest);
+
+
+// Update Request Status
+await requestsAPI.updateStatus(1, "IN_PROGRESS");
+await requestsAPI.updateStatus(1, "REPAIRED");
+
+
+// Assign Technician
+await requestsAPI.assignTechnician(1, 2);  // Request ID, User ID
+
+
+================================================================================
+  ADMIN PANEL ACCESS
+================================================================================
+
+URL: http://localhost:8000/admin/
+Username: admin
+Password: admin123
+
+Use this to:
+- View all data
+- Create test data manually
+- Manage users and teams
+
+
+================================================================================
+  QUICK TEST COMMAND
+================================================================================
+
+Test if backend is working (run in new terminal):
+
+WINDOWS:
+curl http://localhost:8000/api/
+
+MAC/LINUX:
+curl http://localhost:8000/api/
+
+
+Expected response: JSON with endpoint links
+
+
+================================================================================
+  FILE STRUCTURE
+================================================================================
+
+Your React project should look like:
+
+gearguard-frontend/
+  ├── src/
+  │   ├── api/
+  │   │   ├── config.js         (API configuration)
+  │   │   ├── equipment.js      (Equipment API calls)
+  │   │   ├── requests.js       (Requests API calls)
+  │   │   └── teams.js          (Teams API calls)
+  │   ├── components/
+  │   │   └── EquipmentList.js  (Example component)
+  │   ├── App.js                (Main app)
+  │   └── index.js
+  ├── package.json
+  └── node_modules/
+
+
+================================================================================
+  NEED HELP?
+================================================================================
+
+1. Check Django server terminal for errors
+2. Check browser console (F12) for JavaScript errors
+3. Verify http://localhost:8000/api/ returns JSON
+4. Verify http://localhost:3000 loads React app
+5. Check FRONTEND_API_GUIDE.md for detailed API documentation
+
+Backend is configured with:
+✓ CORS enabled for all origins
+✓ AllowAny permissions (no authentication required for hackathon)
+✓ Pagination enabled (10 items per page)
+✓ Browsable API at http://localhost:8000/api/
+
+
+================================================================================
+  ALL-IN-ONE RESTART COMMAND
+================================================================================
+
+If you need to restart everything:
+
+WINDOWS (PowerShell):
+cd backend; ../.venv/Scripts/Activate.ps1; python manage.py runserver 0.0.0.0:8000
+
+MAC/LINUX:
+cd backend && source ../.venv/bin/activate && python manage.py runserver 0.0.0.0:8000
+
+
+Keep terminal open, then in NEW terminal start React:
+cd gearguard-frontend && npm start
+
+
+================================================================================
+  DONE! You're ready to build the frontend!
+================================================================================
